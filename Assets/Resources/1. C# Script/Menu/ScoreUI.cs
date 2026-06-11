@@ -9,6 +9,8 @@ public class ScoreUI : MonoBehaviour
     [SerializeField] private TextBlock FPSText;
     [SerializeField] private TextBlock[] healthText;
     [SerializeField] private TextBlock healthValueText;
+    [Space(10)]
+    [SerializeField] private TextBlock highScoreText;
 
     [Header("REFERENCES")]
     [SerializeField] private SnakeController snakeController;
@@ -22,7 +24,9 @@ public class ScoreUI : MonoBehaviour
     [SerializeField] private Color damagedColor = Color.red;
     [SerializeField] private float gradientIntensity = 0.8f;
 
+    private const string HIGH_SCORE_KEY = "HighScore";
     private float elapsedTime;
+    private float currentHighScore;
     private int currentSnakeLength;
     private int prevSnakeLength;
     private float deltaTime;
@@ -47,6 +51,9 @@ public class ScoreUI : MonoBehaviour
             currentHealth = snakeStatus.health;
             UpdateHealthDisplay(currentHealth);
         }
+
+        LoadHighScore();
+        UpdateHighScoreDisplay();
     }
 
     void Update(){
@@ -56,6 +63,7 @@ public class ScoreUI : MonoBehaviour
         HandleElapsedTime();
         HandleSnakeLength();
         HandleFPS();
+        HandleHighScore();
         
         if(snakeStatus != null && currentHealth != snakeStatus.health){
             currentHealth = snakeStatus.health;
@@ -65,12 +73,36 @@ public class ScoreUI : MonoBehaviour
 
     void HandleElapsedTime(){
         elapsedTime += Time.deltaTime;
-        
-        if(elapsedTime < 60f) elapsedTimeText.Text = $"{elapsedTime:F1}s";
+        UpdateElapsedTimeDisplay();
+    }
+
+    void UpdateElapsedTimeDisplay(){
+        if(elapsedTime < 60f){
+            elapsedTimeText.Text = $"{elapsedTime:F1}s";
+        }
         else{
             float minutes = Mathf.FloorToInt(elapsedTime / 60f);
             float seconds = elapsedTime % 60f;
             elapsedTimeText.Text = $"{minutes}:{seconds:F0}s";
+        }
+    }
+
+    void HandleHighScore(){
+        if(elapsedTime > currentHighScore){
+            currentHighScore = elapsedTime;
+            UpdateHighScoreDisplay();
+            SaveHighScore();
+        }
+    }
+
+    void UpdateHighScoreDisplay(){
+        if(highScoreText == null) return;
+        
+        if(currentHighScore < 60f) highScoreText.Text = $"HIGH SCORE: {currentHighScore:F1}s";
+        else{
+            float minutes = Mathf.FloorToInt(currentHighScore / 60f);
+            float seconds = currentHighScore % 60f;
+            highScoreText.Text = $"HIGH SCORE: {minutes}:{seconds:F0}s";
         }
     }
 
@@ -103,12 +135,8 @@ public class ScoreUI : MonoBehaviour
 
         for(int i = 0; i < maxHealth; i++){
             if(healthText[i] != null){
-                if(i < healthValue){
-                    healthText[i].Text = filledHealthChar;
-                }
-                else{
-                    healthText[i].Text = emptyHealthChar;
-                }
+                if(i < healthValue) healthText[i].Text = filledHealthChar;
+                else healthText[i].Text = emptyHealthChar;
                 
                 if(useGradient){
                     float healthPercent = (float)healthValue / maxHealth;
@@ -126,15 +154,28 @@ public class ScoreUI : MonoBehaviour
                         healthText[i].Color = fadedColor;
                     }
                 }
-                else if(i >= healthValue){
-                    healthText[i].Color = damagedColor * 0.5f;
-                }
+                else if(i >= healthValue) healthText[i].Color = damagedColor * 0.5f;
             }
         }
     }
     
     public void ResetTimer(){
         elapsedTime = 0f;
-        elapsedTimeText.Text = "0s";
+        UpdateElapsedTimeDisplay();
     }
+
+    public void SaveHighScore(){
+        PlayerPrefs.SetFloat(HIGH_SCORE_KEY, currentHighScore);
+        PlayerPrefs.Save();
+    }
+
+    public void LoadHighScore() => currentHighScore = PlayerPrefs.GetFloat(HIGH_SCORE_KEY, 0f);
+    public void ResetHighScore(){
+        currentHighScore = 0f;
+        UpdateHighScoreDisplay();
+        SaveHighScore();
+    }
+
+    public float GetHighScore() => currentHighScore;
+    public float GetCurrentScore() => elapsedTime;
 }

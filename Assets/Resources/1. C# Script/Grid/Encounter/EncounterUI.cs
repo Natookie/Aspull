@@ -8,6 +8,7 @@ public class EncounterUI : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TextBlock encounterNameText;
     [SerializeField] private float displayDuration = 2f;
+    [SerializeField] private bool showEncounter = false;
     
     private Coroutine hideCoroutine;
     
@@ -28,8 +29,9 @@ public class EncounterUI : MonoBehaviour
     }
     
     void OnEncounterStarted(EncounterType type){
+        if(!showEncounter) return;
+
         if(hideCoroutine != null) StopCoroutine(hideCoroutine);
-        
         if(encounterNameText != null){
             encounterNameText.Text = GetEncounterName(type);
             hideCoroutine = StartCoroutine(HideAfterDelay());
@@ -37,6 +39,8 @@ public class EncounterUI : MonoBehaviour
     }
     
     void OnEncounterEnded(){
+        if(!showEncounter) return;
+
         if(hideCoroutine != null) StopCoroutine(hideCoroutine);
         if(encounterNameText != null) encounterNameText.Text = "";
     }

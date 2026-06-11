@@ -19,6 +19,7 @@ public class GridGenerator : MonoBehaviour
     [Header("REFERENCES")] 
     [SerializeField] private Camera targetCamera;
     [SerializeField] private ColumnCompressionMovement ccm;
+    [SerializeField] private Material spriteLitMaterial;
     
     [Header("GRID SIZE")] 
     [SerializeField, Range(0.1f, 1f)] private float gridWidthPercentage = 0.8f;
@@ -269,7 +270,7 @@ public class GridGenerator : MonoBehaviour
         sr.color = finalBaseColor;
         
         TileVisual tv = tile.AddComponent<TileVisual>();
-        tv.Initialize(gridData[x, y], new Vector2Int(x, y), finalBaseColor, wallCheckerColors, colorVariationAmount);
+        tv.Initialize(gridData[x, y], new Vector2Int(x, y), finalBaseColor, wallCheckerColors, colorVariationAmount, spriteLitMaterial);
         gridData[x, y].groundVisual = tile;
         gridData[x, y].tileVisualScript = tv;
     }

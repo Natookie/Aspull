@@ -61,7 +61,7 @@ public class SnakeStatus : MonoBehaviour
     public void RestoreHealth(){
         if(!isAlive) return;
         
-        health += 2;
+        health++;
         health = Mathf.Clamp(health, 0, maxHealth);
         
         if(scoreUI != null) scoreUI.UpdateHealthDisplay(health);

@@ -29,7 +29,7 @@ public class TileVisual : MonoBehaviour
     private const int LAYER_DEFAULT = 0;
     private const int LAYER_WATER = 4;
     
-    public void Initialize(GridGenerator.TileData data, Vector2Int pos, Color baseColor, Color[] wallColors, float variation){
+    public void Initialize(GridGenerator.TileData data, Vector2Int pos, Color baseColor, Color[] wallColors, float variation, Material spriteLitMaterial){
         spriteRenderer = GetComponent<SpriteRenderer>();
         columnCompression = FindFirstObjectByType<ColumnCompressionMovement>();
         tileCollider = GetComponent<Collider2D>();
@@ -39,9 +39,11 @@ public class TileVisual : MonoBehaviour
         wallCheckerColors = wallColors;
         colorVariationAmount = variation;
         spriteRenderer.color = groundColor;
+        spriteRenderer.sharedMaterial = spriteLitMaterial;
         currentType = GridGenerator.TileType.Empty;
         wallColorCached = false;
         gameObject.layer = LAYER_DEFAULT;
+
     }
     
     public void UpdateDisplay(GridGenerator.TileType type, bool hurt = false){
@@ -80,6 +82,7 @@ public class TileVisual : MonoBehaviour
                 break;
             case GridGenerator.TileType.Poison:
                 spriteRenderer.color = POISON_COLOR;
+                gameObject.layer = LAYER_DEFAULT;
                 if(tileCollider != null) tileCollider.enabled = false;
                 break;
             case GridGenerator.TileType.SnakeHead:

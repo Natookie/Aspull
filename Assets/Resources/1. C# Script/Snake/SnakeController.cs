@@ -58,6 +58,10 @@ public class SnakeController : MonoBehaviour
         
         InitializeSnake();
         if(TickManager.Instance != null) TickManager.Instance.OnSnakeTick += OnSnakeTick;
+
+        #if DEVELOPEMENT_BUILD
+            enableDebugInput = false;            
+        #endif
     }
     
     void OnDestroy(){
@@ -152,7 +156,6 @@ public class SnakeController : MonoBehaviour
         }
     }
     
-    #if UNITY_EDITOR
     void HandleDebugInput(){
         if(Input.GetMouseButtonDown(0)) pendingGrowth = true;
         if(Input.GetMouseButtonDown(1) && currentLengthCache > 3) pendingShrink = true;
@@ -160,7 +163,6 @@ public class SnakeController : MonoBehaviour
     }
 
     void ToggleMovementPause() => isMovementPaused = !isMovementPaused;
-    #endif
     
     bool IsValidMove(Vector2Int gridPos){
         if(!gridGenerator.IsValidPosition(gridPos)) return false;

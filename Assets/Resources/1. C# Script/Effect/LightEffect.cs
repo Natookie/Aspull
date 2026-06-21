@@ -176,9 +176,7 @@ public class LightEffect : MonoBehaviour
             shineLight.gameObject.SetActive(false);
             isShining = false;
         }
-        else if(enabled && shineLight != null){
-            shineLight.gameObject.SetActive(true);
-        }
+        else if(enabled && shineLight != null) shineLight.gameObject.SetActive(true);
     }
     
     public void SetHeadLightEnabled(bool enabled){
@@ -216,4 +214,6 @@ public class LightEffect : MonoBehaviour
         isShining = true;
         shineTimer = 0f;
     }
+
+    public bool IsDarkEventOnCooldown() => darkState == DarkEventState.Cooldown;
 }

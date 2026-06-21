@@ -160,9 +160,11 @@ public class SnakeController : MonoBehaviour
         if(Input.GetMouseButtonDown(0)) pendingGrowth = true;
         if(Input.GetMouseButtonDown(1) && currentLengthCache > 3) pendingShrink = true;
         if(Input.GetKeyDown(KeyCode.Space)) ToggleMovementPause();
+        if(Input.GetKeyDown(KeyCode.Semicolon)) InstantDeath();
     }
 
     void ToggleMovementPause() => isMovementPaused = !isMovementPaused;
+    public void InstantDeath() => status.TakeDamage(1000);
     
     bool IsValidMove(Vector2Int gridPos){
         if(!gridGenerator.IsValidPosition(gridPos)) return false;

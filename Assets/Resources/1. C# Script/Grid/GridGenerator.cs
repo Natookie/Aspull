@@ -30,13 +30,18 @@ public class GridGenerator : MonoBehaviour
     [SerializeField] private bool useFixedSize = false;
     
     [Header("GRID")] [SerializeField] private float tileSize = 1f;
-    [SerializeField] private Transform gridParent;
+    [SerializeField] private Transform baseGridParent;
+    [SerializeField] private Transform damageGridParent;
     
     [Header("VISUAL")] [SerializeField] private Sprite tileSprite;
     [SerializeField] private Color[] checkerColors = new Color[2];
     [SerializeField] private Color[] wallCheckerColors = new Color[2];
     [SerializeField] private float colorVariationAmount = 0.15f;
     private bool isSnakeHurt = false;
+    
+    [Header("DAMAGE GRID VISUAL")] 
+    [SerializeField] private Color damageGridColor = new Color(1f, 0f, 0f, 0.3f);
+    [SerializeField] private int damageSortingOrder = -1;
     
     [Header("SORTING")] [SerializeField] private string sortingLayerName = "Default";
     [SerializeField] private int groundSortingOrder = 0;
@@ -65,7 +70,14 @@ public class GridGenerator : MonoBehaviour
     void Start(){
         ccm ??= FindFirstObjectByType<ColumnCompressionMovement>();
         if(targetCamera == null) targetCamera = Camera.main;
-        if(!isInitialized){ CalculateGridFromCamera(); InitializeGridData(); GenerateVisualTiles(); isInitialized = true; }
+
+        if(!isInitialized){
+            isInitialized = true; 
+
+            CalculateGridFromCamera(); 
+            InitializeGridData(); 
+            GenerateVisualTiles(); 
+        }
     }
     
     void OnDrawGizmos(){
@@ -182,10 +194,10 @@ public class GridGenerator : MonoBehaviour
     }
     
     void GenerateVisualTiles(){
-        if(gridParent == null){
+        if(baseGridParent == null){
             GameObject parentObj = new GameObject("GridParent");
-            gridParent = parentObj.transform;
-            gridParent.SetParent(transform);
+            baseGridParent = parentObj.transform;
+            baseGridParent.SetParent(transform);
         }
 
         ClearGridChildren();
@@ -194,14 +206,25 @@ public class GridGenerator : MonoBehaviour
                 CreateGroundTile(x, y);
             }
         }
+        
+        GenerateDamageGrid();
     }
     
     void ClearGridChildren(){
-        if(gridParent == null) return;
+        if(baseGridParent == null) return;
         
-        for(int i = gridParent.childCount - 1; i >= 0; i--){
-            if(Application.isPlaying) Destroy(gridParent.GetChild(i).gameObject);
-            else DestroyImmediate(gridParent.GetChild(i).gameObject);
+        for(int i = baseGridParent.childCount - 1; i >= 0; i--){
+            if(Application.isPlaying) Destroy(baseGridParent.GetChild(i).gameObject);
+            else DestroyImmediate(baseGridParent.GetChild(i).gameObject);
+        }
+    }
+    
+    void ClearDamageGridChildren(){
+        if(damageGridParent == null) return;
+        
+        for(int i = damageGridParent.childCount - 1; i >= 0; i--){
+            if(Application.isPlaying) Destroy(damageGridParent.GetChild(i).gameObject);
+            else DestroyImmediate(damageGridParent.GetChild(i).gameObject);
         }
     }
 
@@ -234,6 +257,7 @@ public class GridGenerator : MonoBehaviour
     [Button("Clear Grid", EButtonEnableMode.Editor)] 
     void ClearGrid(){
         ClearGridChildren();
+        ClearDamageGridChildren();
         if(gridData == null) return;
         for(int x = 0; x < calculatedGridSize.x; x++){
             for(int y = 0; y < calculatedGridSize.y; y++){
@@ -246,9 +270,13 @@ public class GridGenerator : MonoBehaviour
         }
     }
     
+    string FormatIndex(int index) => index.ToString("D2");
+    
     void CreateGroundTile(int x, int y){
-        GameObject tile = new GameObject($"Ground_{x}_{y}");
-        tile.transform.SetParent(gridParent);
+        string formattedX = FormatIndex(x);
+        string formattedY = FormatIndex(y);
+        GameObject tile = new GameObject($"{formattedX}_{formattedY}");
+        tile.transform.SetParent(baseGridParent);
         tile.transform.position = new Vector3(
             bottomLeftPosition.x + (x * actualTileSize) + (actualTileSize * 0.5f),
             bottomLeftPosition.y + (y * actualTileSize) + (actualTileSize * 0.5f), 0);
@@ -273,6 +301,39 @@ public class GridGenerator : MonoBehaviour
         tv.Initialize(gridData[x, y], new Vector2Int(x, y), finalBaseColor, wallCheckerColors, colorVariationAmount, spriteLitMaterial);
         gridData[x, y].groundVisual = tile;
         gridData[x, y].tileVisualScript = tv;
+    }
+    
+    void GenerateDamageGrid(){
+        if(damageGridParent == null){
+            GameObject parentObj = new GameObject("DamageGridParent");
+            damageGridParent = parentObj.transform;
+            damageGridParent.SetParent(transform);
+        }
+
+        ClearDamageGridChildren();
+        
+        for(int x = 0; x < calculatedGridSize.x; x++){
+            for(int y = 0; y < calculatedGridSize.y; y++){
+                CreateDamageTile(x, y);
+            }
+        }
+    }
+    
+    void CreateDamageTile(int x, int y){
+        string formattedX = FormatIndex(x);
+        string formattedY = FormatIndex(y);
+        GameObject tile = new GameObject($"{formattedX}_{formattedY}");
+        tile.transform.SetParent(damageGridParent);
+        tile.transform.position = new Vector3(
+            bottomLeftPosition.x + (x * actualTileSize) + (actualTileSize * 0.5f),
+            bottomLeftPosition.y + (y * actualTileSize) + (actualTileSize * 0.5f), 0);
+        tile.transform.localScale = new Vector3(actualTileSize, actualTileSize, 1f);
+        
+        SpriteRenderer sr = tile.AddComponent<SpriteRenderer>();
+        sr.sprite = tileSprite;
+        sr.color = damageGridColor;
+        sr.sortingLayerName = sortingLayerName;
+        sr.sortingOrder = damageSortingOrder;
     }
     
     void UpdateTileVisuals(){

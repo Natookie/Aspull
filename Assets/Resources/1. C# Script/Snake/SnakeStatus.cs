@@ -6,10 +6,12 @@ public class SnakeStatus : MonoBehaviour
 {
     [Header("HEALTH")]
     [ReadOnly] public int health;
+    [ReadOnly] public int shieldCount;
     private const int maxHealth = 10;
 
     [Header("REFERENCES")]
     [SerializeField] private ScoreUI scoreUI;
+    [SerializeField] private SnakeUI snakeUI;
     [SerializeField] private GridGenerator gridGenerator;
     [SerializeField] private SnakeHitEffect snakeHitEffect;
 
@@ -34,6 +36,12 @@ public class SnakeStatus : MonoBehaviour
 
     public void TakeDamage(int value){
         if(!isAlive) return;
+        if(shieldCount > 0){
+            snakeUI.DeductShield();
+            AudioManager.Instance.PlayShield();
+            return;
+        }
+        snakeUI.Interrupt();
         AudioManager.Instance.PlayDestroyBlock();
         
         health -= value;
@@ -51,6 +59,7 @@ public class SnakeStatus : MonoBehaviour
         if(isInvincible) return;
         isAlive = false;
         
+        scoreUI.HandleFinalScore();
         AudioManager.Instance?.PlayGameOver();
         GameStateManager.Instance.ChangeState(GameStateManager.GameState.Boot);
         gridGenerator?.ClearAllTilesAndGameOver(() => {

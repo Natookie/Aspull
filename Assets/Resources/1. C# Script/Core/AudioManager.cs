@@ -24,6 +24,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip countDownSFX;
     [SerializeField] private AudioClip snakeStuckSFX;
     [SerializeField] private AudioClip snakeUnstuckSFX;
+    [SerializeField] private AudioClip shieldSFX;
+    [SerializeField] private AudioClip shieldGainSFX;
     [Space(10)]
     [SerializeField] [Range(0f, 1f)] private float sfxVolume = 0.7f;
     
@@ -109,6 +111,8 @@ public class AudioManager : MonoBehaviour
     public void PlayCountDown() => PlaySFX(countDownSFX);
     public void PlaySnakeStuck() => PlaySFX(snakeStuckSFX);
     public void PlaySnakeUnstuck() => PlaySFX(snakeUnstuckSFX);
+    public void PlayShield() => PlaySFX(shieldSFX);
+    public void PlayShieldGain() => PlaySFX(shieldGainSFX);
 
     void PlaySFX(AudioClip clip){
         if(clip == null) return;

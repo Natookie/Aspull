@@ -29,12 +29,18 @@ public class MenuUI : MonoBehaviour
     [SerializeField] private float scaleMultiplier = 1.1f;
     [SerializeField] private float animationDuration = 0.2f;
 
+    [Header("REFERENCES")]
+    [SerializeField] private ScoreUI scoreUI;
+    [SerializeField] private SnakeController controller;
+
     private Vector3 playOriginalScale;
     private Vector3 exitOriginalScale;
     private float playOriginalY;
     private float exitOriginalY;
     private Coroutine playAnimationCoroutine;
     private Coroutine exitAnimationCoroutine;
+
+    private bool isRunning = false;
 
     void Awake(){
         playContainer.AddGestureHandler<Gesture.OnClick>(OnPlayClick);
@@ -54,6 +60,10 @@ public class MenuUI : MonoBehaviour
     void OnPlayClick(Gesture.OnClick evt){
         if(GameStateManager.Instance.IsGameActive()) return;
         GameStateManager.Instance?.StartGame();
+        scoreUI.HideFinalScore();
+
+        exitText.Text = (isRunning) ? "Exit" : "New";
+        isRunning ^= true;
     }
 
     void OnPlayHover(Gesture.OnHover evt){
@@ -68,6 +78,10 @@ public class MenuUI : MonoBehaviour
     }
 
     void OnExitClick(Gesture.OnClick evt){
+        if(isRunning){
+            controller.InstantDeath();
+            return;
+        }
         #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
         #else

@@ -40,7 +40,7 @@ graph TD
     Assets --> Sortify
     Assets --> bl4st
 
-    Resources --> ScriptDir[Assets/Resources/1. C# Script]
+    Resources --> ScriptDir[Assets/_Projects/1. C# Script]
     ScriptDir --> Core
     ScriptDir --> Grid
     ScriptDir --> Menu

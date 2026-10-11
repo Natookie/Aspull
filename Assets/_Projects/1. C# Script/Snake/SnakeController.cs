@@ -146,7 +146,7 @@ public class SnakeController : MonoBehaviour
         if(leftPressed)  EnqueueInput(Vector2Int.left);
         if(rightPressed) EnqueueInput(Vector2Int.right);
     }
-
+    
     void EnqueueInput(Vector2Int newInput){
         if(newInput == lastEnqueuedDirection) return;
         if(inputCount < 3){
